@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { json } = require('sequelize/types');
+// const { json } = require('sequelize/types');
 const { Tag, Product, ProductTag } = require('../../models');
 
 // The `/api/tags` endpoint
@@ -8,7 +8,14 @@ router.get('/', (req, res) => {
   // find all tags
   // be sure to include its associated Product data
 
-  Tag.findAll({}).then(tags => {
+  Tag.findAll({
+    include : [
+      { 
+        model : Product,
+        attributes : ['id', 'product_name', 'price', 'stock', 'category_id']
+      }
+    ]
+  }).then(tags => {
     res.json(tags);
   })
 
@@ -19,6 +26,12 @@ router.get('/:id', (req, res) => {
   // be sure to include its associated Product data
 
   Tag.findOne({
+    include : [
+      { 
+        model : Product,
+        attributes : ['id', 'product_name', 'price', 'stock', 'category_id']
+      }
+    ],
     where : {
       id : req.params.id
     }
@@ -45,6 +58,10 @@ router.put('/:id', (req, res) => {
       id : req.params.id
     }
   }).then(updatedTag => {
+    if(!updatedTag) {
+      res.status(404).json({ message: 'No tag found with this id'});
+      return;
+    }
     res.json(updatedTag);
   })
 
@@ -58,6 +75,10 @@ router.delete('/:id', (req, res) => {
       id: req.params.id
     }
   }).then(deletedTag => {
+    if(!deletedTag) {
+      res.status(404).json({ message: 'No tag found with this id'});
+      return;
+    }
     res.json(deletedTag);
   })
 

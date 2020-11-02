@@ -7,7 +7,18 @@ router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
 
-  Product.findAll({}).then(products => {
+  Product.findAll({
+    include : [
+      {
+        model: Category,
+        attributes: ['id', 'category_name']
+      },
+      {
+        model: Tag,
+        attributes: ['id', 'tag_name']
+      }
+    ]
+  }).then(products => {
     res.json(products);
   })
 
@@ -20,8 +31,22 @@ router.get('/:id', (req, res) => {
   Product.findOne({
     where : {
       id : req.params.id
-    }
+    },
+    include : [
+      {
+        model: Category,
+        attributes: ['id', 'category_name']
+      },
+      {
+        model: Tag,
+        attributes: ['id', 'tag_name']
+      }
+    ]
   }).then(product => {
+    if(!product) {
+      res.status(404).json({ message: 'No product found with this id'});
+      return;
+    }
     res.json(product);
   })
 });
@@ -108,6 +133,10 @@ router.delete('/:id', (req, res) => {
       id : req.params.id
     }
   }).then(deletedProduct => {
+    if(!deletedProduct) {
+      res.status(404).json({ message: 'No product found with this id'});
+      return;
+    }
     res.json(deletedProduct);
   })
 });
